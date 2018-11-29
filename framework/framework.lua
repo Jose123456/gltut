@@ -1,8 +1,8 @@
-
 dofile("../glsdk/links.lua")
 
 local myPath = os.getcwd();
-local usedLibs = {"glload", "glimage", "glm", "glutil", "glmesh", "freeglut"}
+-- local usedLibs = {"glload", "glimage", "glm", "glutil", "glmesh", "freeglut"}
+local usedLibs = {"glload", "glutil", "glimage"}
 
 local SetupFrameworkProj = function() end
 
@@ -11,13 +11,16 @@ function SetupSolution(slnName)
 		configurations {"Debug", "Release"}
 		defines {"_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE", "_SCL_SECURE_NO_WARNINGS", "TIXML_USE_STL"}
 		defines {"FREEGLUT_STATIC"}
-		
-    	configuration "windows"
-        	defines {"WIN32"}
-        	
-       	configuration "linux"
-    	    defines {"LOAD_X11"}
-		
+
+		configuration "windows"
+			defines {"WIN32"}
+
+		configuration "linux"
+			defines {"LOAD_X11"}
+
+		configuration "macosx"
+			defines "GL_SILENCE_DEPRECATION"
+
 
 	SetupFrameworkProj = 
 	function ()
@@ -37,9 +40,8 @@ function SetupSolution(slnName)
 			objdir "../framework/lib"
 
 			includedirs {"../framework"}
-			
 			UseLibs(usedLibs)
-			
+
 			configuration "Debug"
 				defines {"DEBUG", "_DEBUG"}
 				flags "Symbols"
@@ -65,7 +67,7 @@ function SetupProject(projName, ...)
 			
 		links "framework"
 
-		--Must be after including framwork... because GCC is stupid.
+		--Must be after including framework... because GCC is stupid.
 		UseLibs(usedLibs)
 
 		configuration "Debug"
@@ -81,8 +83,15 @@ function SetupProject(projName, ...)
 		configuration {"windows"}
 			links {"glu32", "opengl32", "gdi32", "winmm", "user32"}
 
-	    configuration "linux"
-	        links {"GL", "GLU", "X11", "pthread"}
+		configuration "linux"
+			links {"GL", "GLU", "X11", "pthread"}
+
+		configuration "macosx"
+			links {"OpenGL.framework", "CoreFoundation.framework"}
+
+		configuration {"macosx", "gmake"}
+			buildoptions {"-F /Library/Frameworks"}
+			linkoptions {"-F /Library/Frameworks", "`pkg-config --libs freeglut`"}
 
 	SetupFrameworkProj()
 

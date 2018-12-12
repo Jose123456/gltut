@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <glload/gl_3_3.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 #include "../framework/framework.h"
 
 #define ARRAY_COUNT( array ) (sizeof( array ) / (sizeof( array[0] ) * (sizeof( array ) != sizeof(void*) || sizeof( array[0] ) <= sizeof(void*))))
@@ -53,8 +53,6 @@ void init()
 }
 
 //Called to update the display.
-//You should call glutSwapBuffers after all of your rendering to display what you rendered.
-//If you need continuous updates of the screen, call glutPostRedisplay() at the end of the function.
 void display()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -70,8 +68,6 @@ void display()
 
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
-
-	glutSwapBuffers();
 }
 
 //Called whenever the window is resized. The new window size is given, in pixels.
@@ -82,16 +78,16 @@ void reshape (int w, int h)
 }
 
 //Called whenever a key on the keyboard was pressed.
-//The key is given by the ''key'' parameter, which is in ASCII.
-//It's often a good idea to have the escape key (ASCII value 27) call glutLeaveMainLoop() to 
+//The key is given by the ''key'' parameter.
+//It's often a good idea to have the escape key call glfwSetWindowShouldClose() to 
 //exit the program.
-void keyboard(unsigned char key, int x, int y)
+void keyboard(GLFWwindow* window, int key)
 {
 	switch (key)
 	{
-	case 27:
-		glutLeaveMainLoop();
-		return;
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+			break;
 	}
 }
 

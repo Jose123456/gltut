@@ -129,8 +129,6 @@ void init()
 }
 
 //Called to update the display.
-//You should call glutSwapBuffers after all of your rendering to display what you rendered.
-//If you need continuous updates of the screen, call glutPostRedisplay() at the end of the function.
 void display()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

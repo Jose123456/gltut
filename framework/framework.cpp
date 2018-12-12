@@ -10,7 +10,7 @@
 #include <glload/gl_3_3.h>
 #include <glload/gl_load.hpp>
 #include <glutil/Shader.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 #include "framework.h"
 #include "directories.h"
 
@@ -82,9 +82,24 @@ namespace Framework
 void init();
 void display();
 void reshape(int w, int h);
-void keyboard(unsigned char key, int x, int y);
+void keyboard(GLFWwindow* window, int key);
 
 unsigned int defaults(unsigned int displayMode, int &width, int &height);
+
+// GLUT-GLFW glue functions
+static void resize_callback(GLFWwindow* window, int width, int height)
+{
+	reshape(width, height);
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_PRESS)
+	{
+		keyboard(window, key);
+	}
+}
+
 
 void APIENTRY DebugFunc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 			   const GLchar* message, const GLvoid* userParam)
@@ -125,33 +140,43 @@ void APIENTRY DebugFunc(GLenum source, GLenum type, GLuint id, GLenum severity, 
 
 int main(int argc, char** argv)
 {
-	glutInit(&argc, argv);
+	if (!glfwInit())
+	{
+		fprintf(stderr, "ERROR: could not start GLFW3\n");
+		return 1;
+	}
 
 	int width = 500;
 	int height = 500;
-	unsigned int displayMode = GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH | GLUT_STENCIL;
-	displayMode = defaults(displayMode, width, height);
+	defaults(-1, width, height);
 
-	glutInitDisplayMode (displayMode);
-	glutInitContextVersion (3, 3);
-	glutInitContextProfile(GLUT_CORE_PROFILE);
-#ifdef DEBUG
-	glutInitContextFlags(GLUT_DEBUG);
-#endif
-	glutInitWindowSize (width, height); 
-	glutInitWindowPosition (300, 200);
-	int window = glutCreateWindow (argv[0]);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	GLFWwindow *window = glfwCreateWindow(width, height, argv[0], NULL, NULL);
+	if (!window)
+	{
+		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+		glfwTerminate();
+		return 1;
+	}
 
+	glfwMakeContextCurrent(window);
 	glload::LoadFunctions();
 
-	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+#ifdef DEBUG
+	const GLubyte *version = glGetString( GL_VERSION );
+	printf("version: %s\n", version);
+#endif
 
 	if(!glload::IsVersionGEQ(3, 3))
 	{
 		printf("Your OpenGL version is %i, %i. You must have at least OpenGL 3.3 to run this tutorial.\n",
 			glload::GetMajorVersion(), glload::GetMinorVersion());
-		glutDestroyWindow(window);
-		return 0;
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		return 1;
 	}
 
 	if(glext_ARB_debug_output)
@@ -162,9 +187,22 @@ int main(int argc, char** argv)
 
 	init();
 
-	glutDisplayFunc(display); 
-	glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyboard);
-	glutMainLoop();
+	glfwSetFramebufferSizeCallback(window, resize_callback);
+	glfwSetKeyCallback(window, key_callback);
+
+	// Set initial aspect ratio
+	glfwGetFramebufferSize(window, &width, &height);
+	resize_callback(window, width, height);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		display();
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwDestroyWindow(window);
+	glfwTerminate();
 	return 0;
 }

@@ -4,8 +4,7 @@
 #include <vector>
 #include <stdio.h>
 #include <glload/gl_3_2_comp.h>
-#include <GL/freeglut.h>
-
+#include <GLFW/glfw3.h>
 
 GLuint CreateShader(GLenum eShaderType, const std::string &strShaderFile)
 {
@@ -147,8 +146,6 @@ void display()
 
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
-
-	glutSwapBuffers();
 }
 
 //Called whenever the window is resized. The new window size is given, in pixels.
@@ -159,16 +156,16 @@ void reshape (int w, int h)
 }
 
 //Called whenever a key on the keyboard was pressed.
-//The key is given by the ''key'' parameter, which is in ASCII.
-//It's often a good idea to have the escape key (ASCII value 27) call glutLeaveMainLoop() to 
+//The key is given by the ''key'' parameter.
+//It's often a good idea to have the escape key call glfwSetWindowShouldClose() to 
 //exit the program.
-void keyboard(unsigned char key, int x, int y)
+void keyboard(GLFWwindow* window, int key)
 {
 	switch (key)
 	{
-	  case 27:
-		  glutLeaveMainLoop();
-		  return;
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+			break;
 	}
 }
 

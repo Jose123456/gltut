@@ -91,7 +91,7 @@ function SetupProject(projName, ...)
 
 		configuration {"macosx", "gmake"}
 			buildoptions {"-F /Library/Frameworks"}
-			linkoptions {"-F /Library/Frameworks", "`pkg-config --libs freeglut`"}
+			linkoptions {"-F /Library/Frameworks", "`pkg-config --libs glfw3`"}
 
 	SetupFrameworkProj()
 

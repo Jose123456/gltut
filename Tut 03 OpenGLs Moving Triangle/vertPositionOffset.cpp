@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glload/gl_3_3.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 #include "../framework/framework.h"
 
 GLuint theProgram;
@@ -58,7 +58,7 @@ void ComputePositionOffsets(float &fXOffset, float &fYOffset)
 	const float fLoopDuration = 5.0f;
 	const float fScale = 3.14159f * 2.0f / fLoopDuration;
 
-	float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	float fElapsedTime = glfwGetTime();
 
 	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
 
@@ -89,9 +89,6 @@ void display()
 
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
-
-	glutSwapBuffers();
-	glutPostRedisplay();
 }
 
 //Called whenever the window is resized. The new window size is given, in pixels.
@@ -102,16 +99,16 @@ void reshape (int w, int h)
 }
 
 //Called whenever a key on the keyboard was pressed.
-//The key is given by the ''key'' parameter, which is in ASCII.
-//It's often a good idea to have the escape key (ASCII value 27) call glutLeaveMainLoop() to 
+//The key is given by the ''key'' parameter.
+//It's often a good idea to have the escape key call glfwSetWindowShouldClose() to 
 //exit the program.
-void keyboard(unsigned char key, int x, int y)
+void keyboard(GLFWwindow* window, int key)
 {
 	switch (key)
 	{
-	case 27:
-		glutLeaveMainLoop();
-		return;
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+			break;
 	}
 }
 
